@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart';
+import '../models/access_record.dart';
+import '../services/access_log_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -7,6 +9,7 @@ class LoginPage extends StatefulWidget {
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
+
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
@@ -29,19 +32,43 @@ class _LoginPageState extends State<LoginPage> {
 
   void _ingresar() {
     if (_formKey.currentState!.validate()) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const HomePage(),
+      final usuario = _correoController.text.trim();
+      final password = _passwordController.text;
+
+      // Validación del acceso
+      final exitoso =
+          usuario == 'admin@gmail.com' && password == '123456';
+
+      // Registrar el intento en la bitácora
+      logService.add(
+        AccessRecord(
+          usuario: usuario,
+          fechaHora: DateTime.now(),
+          exitoso: exitoso,
         ),
       );
+
+      if (exitoso) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomePage(),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Correo o contraseña incorrectos'),
+          ),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff3f6f4),
+      backgroundColor: const Color.fromARGB(255, 200, 168, 235),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),

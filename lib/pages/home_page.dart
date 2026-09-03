@@ -1,7 +1,12 @@
-import 'package:flutter/material.dart';
-import '../services/productos_service.dart';
-import 'login_page.dart';
+import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:file_selector/file_selector.dart';
+import 'package:web/web.dart' as web;
+
+import '../services/productos_service.dart';
+import '../services/access_log_service.dart';
+import 'login_page.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -11,6 +16,61 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<List<dynamic>> _productos;
+  Future<void> _importarBitacora() async {
+ 
+  const typeGroup = XTypeGroup(
+    label: 'JSON',
+    extensions: ['json'],
+    mimeTypes: ['application/json'],
+  );
+
+  final XFile? file = await openFile(
+    acceptedTypeGroups: [typeGroup],
+  );
+
+  if (file == null) return;
+
+  try {
+    final contenido = await file.readAsString();
+
+    logService.importJson(contenido);
+
+    setState(() {});
+  } on FormatException catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('JSON inválido: ${e.message}'),
+      ),
+    );
+  } catch (_) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('No se pudo leer el archivo'),
+      ),
+    );
+  }
+}
+void _descargarJson(String contenido) {
+  final base64 = base64Encode(
+    utf8.encode(contenido),
+  );
+
+  web.HTMLAnchorElement()
+    ..href = 'data:application/json;base64,$base64'
+    ..setAttribute(
+      'download',
+      'bitacora_accesos.json',
+    )
+    ..click();
+}
+
+void _exportarBitacora() {
+  _descargarJson(logService.exportJson());
+}  
 
   @override
   void initState() {
@@ -48,7 +108,23 @@ class _HomePageState extends State<HomePage> {
             const Color.fromARGB(255, 74, 15, 102),
         foregroundColor:
             Colors.white,
-        actions: [
+                actions: [
+          ElevatedButton.icon(
+            onPressed: _exportarBitacora,
+            icon: const Icon(Icons.download),
+            label: const Text('Exportar JSON'),
+          ),
+
+          const SizedBox(width: 8),
+
+          OutlinedButton.icon(
+            onPressed: _importarBitacora,
+            icon: const Icon(Icons.upload_file),
+            label: const Text('Importar JSON'),
+          ),
+
+          const SizedBox(width: 8),
+
           IconButton(
             tooltip: 'Recargar',
             onPressed: _recargar,
@@ -63,7 +139,7 @@ class _HomePageState extends State<HomePage> {
             icon:
                 const Icon(Icons.logout),
           ),
-        ],
+        ],flu
       ),
 
       body:
@@ -130,111 +206,113 @@ class _HomePageState extends State<HomePage> {
               constraints,
             ) {
               return Column(
-                children: [
-                  Container(
-                    width:
-                        double.infinity,
-                    padding:
-                        const EdgeInsets.all(
-                            24),
-                    color:
-                        const Color.fromARGB(255, 218, 173, 232),
-                    child:
-                        const Column(
-                      children: [
-                        Text(
-                          'Catálogo de productos',
-                          style:
-                              TextStyle(
-                            fontSize: 26,
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          'Productos obtenidos mediante una API REST',
-                        ),
-                      ],
-                    ),
-                  ),
+  children: [
+    Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      color: const Color.fromARGB(255, 218, 173, 232),
+      child: const Column(
+        children: [
+          Text(
+            'Catálogo de productos',
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 5),
+          Text(
+            'Productos obtenidos mediante una API REST',
+          ),
+        ],
+      ),
+    ),
 
-                  Expanded(
-                    child:
-                        ListView.builder(
-                      padding:
-                          const EdgeInsets.all(
-                              20),
-                      itemCount:
-                          productos.length,
-                      itemBuilder:
-                          (
-                        context,
-                        index,
-                      ) {
-                        final producto =
-                            productos[
-                                index];
+    // PRODUCTOS
+    Expanded(
+      flex: 2,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(20),
+        itemCount: productos.length,
+        itemBuilder: (context, index) {
+          final producto = productos[index];
 
-                        final int id =
-                            producto[
-                                'id'];
+          final int id = producto['id'];
 
-                        final String
-                            nombre =
-                            producto[
-                                'title'];
+          final String nombre = producto['title'];
 
-                        final int precio =
-                            id *
-                                100;
+          final int precio = id * 100;
 
-                        return Card(
-                          margin:
-                              const EdgeInsets.only(
-                            bottom:
-                                12,
-                          ),
-                          child:
-                              ListTile(
-                            leading:
-                                CircleAvatar(
-                              backgroundColor:
-                                  const Color.fromARGB(255, 124, 232, 231),
-                              foregroundColor:
-                                  Colors
-                                      .white,
-                              child: Text(
-                                id.toString(),
-                              ),
-                            ),
-                            title:
-                                Text(
-                              nombre,
-                              style:
-                                  const TextStyle(
-                                fontWeight:
-                                    FontWeight.bold,
-                              ),
-                            ),
-                            subtitle:
-                                Text(
-                              'Precio: ₡$precio',
-                            ),
-                            trailing:
-                                const Icon(
-                              Icons
-                                  .shopping_cart_outlined,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              );
+          return Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor:
+                    const Color.fromARGB(255, 124, 232, 231),
+                foregroundColor: Colors.white,
+                child: Text(id.toString()),
+              ),
+              title: Text(
+                nombre,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              subtitle: Text(
+                'Precio: ₡$precio',
+              ),
+              trailing: const Icon(
+                Icons.shopping_cart_outlined,
+              ),
+            ),
+          );
+        },
+      ),
+    ),
+
+    // BITÁCORA
+    Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      child: const Text(
+        'Bitácora de accesos',
+        style: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ),
+
+    Expanded(
+      flex: 1,
+      child: ListView.builder(
+        itemCount: logService.records.length,
+        itemBuilder: (context, index) {
+          final r = logService.records[index];
+
+          return ListTile(
+            leading: Icon(
+              r.exitoso
+                  ? Icons.check_circle
+                  : Icons.cancel,
+            ),
+            title: Text(
+              r.usuario.isEmpty
+                  ? '(sin usuario)'
+                  : r.usuario,
+            ),
+            subtitle: Text(
+              r.fechaHora.toString(),
+            ),
+            trailing: Text(
+              r.exitoso ? 'OK' : 'FALLÓ',
+            ),
+          );
+        },
+      ),
+    ),
+  ],
+);
             },
           );
         },
