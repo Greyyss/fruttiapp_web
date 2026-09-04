@@ -100,12 +100,12 @@ void _exportarBitacora() {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
-          const Color(0xfff3f6f4),
+          const Color.fromARGB(255, 213, 234, 162),
 
       appBar: AppBar(
         title: const Text('FrutiApp Web'),
         backgroundColor:
-            const Color.fromARGB(255, 74, 15, 102),
+            const Color.fromARGB(255, 213, 234, 162),
         foregroundColor:
             Colors.white,
                 actions: [
@@ -139,7 +139,7 @@ void _exportarBitacora() {
             icon:
                 const Icon(Icons.logout),
           ),
-        ],flu
+        ],
       ),
 
       body:
@@ -210,7 +210,7 @@ void _exportarBitacora() {
     Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
-      color: const Color.fromARGB(255, 218, 173, 232),
+      color: const Color.fromARGB(255, 213, 234, 162),
       child: const Column(
         children: [
           Text(
@@ -248,8 +248,8 @@ void _exportarBitacora() {
             child: ListTile(
               leading: CircleAvatar(
                 backgroundColor:
-                    const Color.fromARGB(255, 124, 232, 231),
-                foregroundColor: Colors.white,
+                    const Color.fromARGB(255, 11, 13, 50),
+                foregroundColor: const Color.fromARGB(255, 86, 214, 106),
                 child: Text(id.toString()),
               ),
               title: Text(

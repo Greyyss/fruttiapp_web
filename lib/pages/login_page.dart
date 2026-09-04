@@ -68,7 +68,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 200, 168, 235),
+      backgroundColor: const Color.fromARGB(255, 213, 234, 162),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -88,9 +88,9 @@ class _LoginPageState extends State<LoginPage> {
                         CrossAxisAlignment.stretch,
                     children: [
                       const Icon(
-                        Icons.shopping_basket,
+                        Icons.person,
                         size: 70,
-                        color: Color.fromARGB(255, 132, 64, 204),
+                        color: Color.fromARGB(255, 9, 10, 47),
                       ),
 
                       const SizedBox(height: 15),
